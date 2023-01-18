@@ -1,59 +1,81 @@
 name: 'Push'
+
 on:
-  push:
-    branches:
-      - $default-branch
-  schedule:
-    - cron: 2 4 10 * *
+  # push:
+  #   branches:
+  #     - $default-branch
+  # schedule:
+  #   - cron: 2 4 10 * *
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 360
     name: 'Build'
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        env:
-          -
-            - jekyll:4.2.2
-            - jekyll:stable
-            - jekyll:latest
-            - jekyll:4.0
-            - jekyll:4
-          -
-            - builder:4.2.2
-            - builder:stable
-            - builder:latest
-            - builder:4.0
-            - builder:4
-          -
-            - minimal:4.2.2
-            - minimal:stable
-            - minimal:latest
-            - minimal:4.0
-            - minimal:4
-          - builder:pages
-          - minimal:pages
-          - jekyll:pages
+        variant: [jekyll, builder, minimal]
+        main_tag: [latest, pages]
+        include:
+          - main_tag: latest
+            tags: |
+              type=raw,priority=900,value=latest
+              type=raw,priority=700,value=4.2.2
+              type=raw,priority=500,value=4.0
+              type=raw,priority=300,value=4
+              type=raw,priority=100,value=stable
+          - main_tag: pages
+            tags: |
+              type=raw,value=pages
+
     steps:
+      - name: Checkout Code
       - uses: actions/checkout@v3
-      - uses: actions/setup-ruby@v1
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: '2.x'
-      - run: bundle install
-      - run: |
-          echo $'{\n    "experimental": true\n}' | \
-            sudo tee /etc/docker/daemon.json
-          sudo systemctl restart docker
-        name: 'docker experimental'
-      - name: 'docker login'
+          bundler-cache: true
+
+      - name: Generate Dockerfiles
         run: |
-          echo "${{secrets.DOCKER_PASSWORD}}" | docker login \
-            --username ${{secrets.DOCKER_USERNAME}} \
-            --password-stdin
-      - run: |
-          docker-template build $DOCKER_REPO --no-push --force --squash
-          docker-template push  $DOCKER_REPO
-        env:
-          RUBYOPT: "-W0"
-          DOCKER_REPO: "${{join(matrix.env, ' ')}}"
+          gem install docker-template
+          docker-template build cache
+
+      - name: Set Metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: rockstorm/jekyll-${{ matrix.variant }}
+          tags: ${{ matrix.tags }}|
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: rockstorm
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v3
+        with:
+          context: ./repos/${{ matrix.variant }}/cache/${{ matrix.main_tag }}
+          platforms: |
+            linux/386
+            linux/amd64
+            linux/arm/v6
+            linux/arm/v7
+            linux/arm64/v8
+            linux/ppc64le
+            linux/s390x
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: "--squash"
