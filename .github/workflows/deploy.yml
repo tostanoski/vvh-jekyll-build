@@ -21,14 +21,13 @@ jobs:
         include:
           - main_tag: latest
             tags: |
-              type=raw,priority=900,value=latest
-              type=raw,priority=700,value=4.2.2
-              type=raw,priority=500,value=4.0
-              type=raw,priority=300,value=4
-              type=raw,priority=100,value=stable
+              latest,priority=900
+              4.2.2,priority=700
+              4.0,priority=500
+              4,priority=300
+              stable,priority=100
           - main_tag: pages
-            tags: |
-              type=raw,value=pages
+            tags: pages
 
     steps:
       - name: Checkout Code
@@ -41,6 +40,8 @@ jobs:
           bundler-cache: true
 
       - name: Generate Dockerfiles
+        env:
+          RUBYOPT: "-W0"
         run: |
           gem install docker-template
           docker-template cache
@@ -50,7 +51,8 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: rockstorm/jekyll-${{ matrix.variant }}
-          tags: ${{ matrix.tags }}|
+          flavor: latest=false
+          tags: ${{ matrix.tags }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
