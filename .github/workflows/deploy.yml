@@ -43,7 +43,7 @@ jobs:
       - name: Generate Dockerfiles
         run: |
           gem install docker-template
-          docker-template build cache
+          docker-template cache
 
       - name: Set Metadata
         id: meta
