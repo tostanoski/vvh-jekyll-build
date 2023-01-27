@@ -1,6 +1,7 @@
 name: 'Push'
 
 on:
+  - pull-request
   push:
     branches:
       - $default-branch
