@@ -2,6 +2,7 @@ name: 'Push'
 
 on:
   pull-request:
+    types: [synchronize, edited, opened]
   push:
     branches:
       - $default-branch
