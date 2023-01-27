@@ -49,7 +49,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: jekyll/${{ matrix.variant }}
+          images: tostanoski/jekyll-${{ matrix.variant }}
           flavor: latest=false
           tags: ${{ matrix.tags }}
 
