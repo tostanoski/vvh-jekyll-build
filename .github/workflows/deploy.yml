@@ -70,12 +70,8 @@ jobs:
         with:
           context: ./repos/${{ matrix.variant }}/cache/${{ matrix.main_tag }}
           platforms: |
-            linux/386
             linux/amd64
-            linux/arm/v6
-            linux/arm/v7
             linux/arm64/v8
-            linux/s390x
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           build-args: "--squash"
