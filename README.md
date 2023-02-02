@@ -1,3 +1,16 @@
+# Jekyll Docker: Veeva Vault Help Edition
+
+This repository is a fork of a fork. The [Veeva Vault Help](https://veevavault.help/) project began utilizing @envygeeks Jekyll Docker images for creating our production images. I primarily do my production builds on a MacBook Pro M1 Max now, so I needed a proper native image to avoid having to use Rosetta or QEMU.
+
+It's a lot of pages.
+
+@rockstorm101 has a PR going to modernize the images and make them multi-platform. I forked their fork, pared it down to what we need, and tossed it on Docker Hub.
+
+You probably don't want to use this image. Our site is not your site. You're likely better off awaiting updates to jekyll-docker itself, or, should what I did here work for you, fork my image and maintain it on your own.
+
+The primary changes from the original code are the updates to this README (original content is below), removal of the funding file (give envygeeks or rockstorm101 your money if you want to give someone money), switching to Ruby 2 (this seems to work better with our project), and limiting the platforms to AMD64 and ARM64 (the only two platforms we use).
+
+---
 [![Github Workflow Status](https://img.shields.io/github/workflow/status/envygeeks/jekyll-docker/Push?style=for-the-badge)](https://github.com/envygeeks/jekyll-docker/actions) [![Donate](https://img.shields.io/badge/DONATE-MONEY-yellow.svg?style=for-the-badge)](https://envygeeks.io#donate) [![Docker Stars](https://img.shields.io/docker/stars/jekyll/jekyll.svg?style=for-the-badge)]() [![Docker Pulls](https://img.shields.io/docker/pulls/jekyll/jekyll.svg?style=for-the-badge)]()
 
 # Jekyll Docker
